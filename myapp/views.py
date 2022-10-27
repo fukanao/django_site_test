@@ -21,48 +21,97 @@ class PortalView(TemplateView):
 class InputBlogObject:
     def __init__(self):
         ## id最大値取得
-        maxid_object = Blog.objects.aggregate(Max('id_num'))
-        self.maxid =  int(maxid_object['id_num__max'])
+        #maxid_object = Blog.objects.aggregate(Max('id_num'))
+        #self.maxid =  int(maxid_object['id_num__max'])
+        self.maxid = 0
         print('#25', self.maxid)
         self.title = ''
         self.text = ''
+    def set_maxid(self, maxid):
+        self.maxid = maxid
 
+
+maxid_object = Blog.objects.aggregate(Max('id_num'))
+maxid =  int(maxid_object['id_num__max'])
 input_blog_object_list = []
 form_num = 0
 
+
 def blog_form(request):
     form = BlogForm
+    global maxid
+    global form_num
+    global input_blog_object_list
 
     ## id最大値取得
-    maxid_object = Blog.objects.aggregate(Max('id_num'))
-    maxid = int(maxid_object['id_num__max'])
+    #maxid_object = Blog.objects.aggregate(Max('id_num'))
+    #maxid = int(maxid_object['id_num__max'])
 
     ## 入力値オブジェクト作成
     obj = InputBlogObject()
-    #input_blog_object_list.append(obj)
-    print('#43 len =',len(input_blog_object_list))
+    obj.set_maxid(maxid)
 
     ## 入力値オブジェクトへインプット関数
     def input_blog_object(form_num, maxid, title, text):
         input_blog_object_list[form_num].maxid = maxid
         input_blog_object_list[form_num].title = form.cleaned_data['title']
         input_blog_object_list[form_num].text = form.cleaned_data['text']
-        print('#49',input_blog_object_list[form_num].maxid)
+        #print('#49',input_blog_object_list[form_num].maxid)
+
+
+    def debug_var():
+        print('form_num =',form_num)
+        print('maxid =',maxid)
+        print('len object_list =',len(input_blog_object_list))
+        for o in input_blog_object_list:
+            print('maxid=',o.maxid)
+
+    print('#58')
+    debug_var()
 
     if request.method == 'POST':
         form = BlogForm(request.POST)
 
+        ## プレビューページへ
         if form.is_valid() and ('button_1' in request.POST):
-            context = { 'form': form }
-
+            context = { 'form': form,
+                        'compo_num': form_num + 1
+                        }
             # object listへobjectを追加
             input_blog_object_list.append(obj)
 
+            maxid += 1
+
             ## objectへインプットメソッド
-            input_blog_object(form_num, maxid + 1, form.cleaned_data['title'],form.cleaned_data['title'])
-            print('#56',maxid + 1)
+            input_blog_object(form_num, maxid, form.cleaned_data['title'],form.cleaned_data['title'])
+
+            print('#77')
+            debug_var()
+
             return render(request, 'myapp/est_preview.html', context = context)
 
+        ## 登録してもう一つの構成登録する
+        elif form.is_valid() and ('button_2' in request.POST):
+            form_num += 1
+            maxid += 1
+            #obj = InputBlogObject()
+            #input_blog_object_list.append(obj)
+            #print('#75',input_blog_object_list[form_num].maxid)
+            print('#89')
+            debug_var()
+
+
+            ## objectへインプットメソッド
+            #input_blog_object(form_num, maxid + 1, form.cleaned_data['title'],form.cleaned_data['title'])
+            context = {
+                'form': form,
+                'compo_num': form_num + 1
+            }
+
+            return render(request, 'myapp/blog_form.html', context = context)
+
+
+        ## 登録してその他製品登録ページへ
         elif form.is_valid() and ('button_3' in request.POST):
             '''
             blog = Blog.objects.create(
@@ -73,22 +122,24 @@ def blog_form(request):
             '''
 
             for input_object in input_blog_object_list:
-                print('#69',input_object.maxid)
                 blog = Blog.objects.create(
                         id_num = input_object.maxid,
                         title = input_object.title,
                         text = input_object.text,
                 )
- 
+
+            # object list初期化
+            input_blog_object_list = []
+            form_num = 0
+
             return render(request, 'myapp/est_register_ok.html')
 
-    #print('Prevew POST!')
-
+    print('#100',form_num)
     context = {
-        'form': form
+        'form': form,
+        'compo_num': form_num + 1
     }
 
-    print(form)
     return render(request, 'myapp/blog_form.html', context)
 
 
@@ -97,18 +148,11 @@ def blog_form(request):
 def edit_blog_form(request):
 
     initial_dict = dict(title="TITLE222", text="テキスト")
-    #initial_dict = dict(title="", text="")
 
     form = EditBlogForm(request.GET or None, initial=initial_dict)
-    #form = EditBlogForm
-    #form = EditBlogForm("TITLE")
-
-    #print("form = ", str(form))
 
     if request.method == 'POST':
         form = EditBlogForm(request.POST)
-        #if form.is_valid():
-        #print('POST')
         if form.is_valid() and ('button_1' in request.POST):
             context = { 'form': form }
             print('button_1')
@@ -116,28 +160,19 @@ def edit_blog_form(request):
 
         elif form.is_valid() and ('button_2' in request.POST):
 
-            #blog = Blog.objects.create(
-
             ### data 更新時は update(sqlite3)
             blog = Blog.objects.update(
-            #blog = Blog.objects.save(
                 id_num = form['id_num'].data,
                 title = form.cleaned_data['title'],
                 text = form.cleaned_data['text'],
             )
  
-            print('button_2')
             return render(request, 'myapp/est_register_ok.html')
-
-    #print('Prevew POST!')
 
     context = {
         'form': form
     }
 
-    #print("form = ",form)
-
-    #return render(request, 'myapp/blog_form.html', context)
     return render(request, 'myapp/blog_form.html', dict(form=form))
 
 
@@ -154,42 +189,28 @@ def list_data(request):
 
     if request.method == 'POST':
         post_data = request.POST
-        #print('post_data = ',post_data)
         post_data_list = list(post_data)
-        #print('post_data_list_1 = ', str(post_data_list))
         print('button_value = ', str(post_data_list[1])) #押されたボタンデータ
         print('button_value = ', str(post_data_list[0])) #押されたボタンデータ
 
-        #print(str(data.post_data_list[1]))
 
         select_id = str(post_data_list[1])
         print("slect_id = ", select_id)
 
         #押されたボタンデータでデータフィルタ
-        #select_data = Blog.objects.filter(title = select_title)
         select_data = Blog.objects.filter(id_num = select_id)
-
-        print("select_data[0].id_num = ",select_data[0].id_num)
-        print("select_data[0].title = ",select_data[0].title)
-        print("select_data[0].text = ",select_data[0].text)
 
         id_num = select_data[0].id_num
         title = select_data[0].title
         text = select_data[0].text
 
-
         initial_dict = dict(id_num = id_num, title = title, text = text)
-        #initial_dict = dict(title="TITLE222", text="テキスト")
-        #initial_dict = dict(title="", text="")
 
         form = EditBlogForm(request.GET or None, initial=initial_dict)
-
 
         return render(request, 'myapp/edit_blog_form.html', dict(form=form))
 
     return render(request, 'myapp/list.html', context)
-
-
 
 
 def select(request):
@@ -204,8 +225,6 @@ def select(request):
 
         if 'button_1' in request.POST:
             print("button_1 press!")
-
-            #context = { 'id': 1 }
 
             id = 1
             context = data_process(id)
@@ -228,7 +247,6 @@ def select(request):
 def show_data(request):
 
     id = 1
-
 
     context = { 'id': id, }
 
