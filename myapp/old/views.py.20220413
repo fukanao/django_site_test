@@ -1,0 +1,26 @@
+from django.shortcuts import render
+
+# Create your views here.
+
+
+# myapp/views.py
+from myapp.models import Blog
+from myapp.forms import BlogForm
+
+from django.template import loader
+
+def blog_form(request):
+    form = BlogForm
+    if request.method == 'POST':
+        form = BlogForm(request.POST)
+        if form.is_valid():
+            blog = Blog.objects.create(
+                title=form.cleaned_data['title'],
+                text=form.cleaned_data['text'],
+            )
+    context = {
+        'form': form
+    }
+    #return render(request, 'myapp/blog_form.html', context)
+    return render(request, 'myapp/blog_form.html', context)
+

@@ -1,0 +1,95 @@
+
+# myapp/forms.py
+from django.core.exceptions import ValidationError
+from django.forms import ModelForm
+from django import forms
+from .models import Blog
+from .models import Products
+
+print('forms.py executed')
+
+
+#data = Blog.objects.all()
+data = Products.objects.all()
+
+#titles = []
+#texts = []
+products = []
+
+for tmp in data:
+    #titles.append(tmp.title)
+    #texts.append(tmp.text)
+    products.append(tmp.product)
+
+print('forms.py   product = ' + str(products))
+#print(titles)
+#print(texts)
+
+#def check_product(input, products_list): で使いまわし
+def check_name(input_product, products_list):
+
+    print('check_name   products1 = ' + str(products))
+    i = 0
+    list_num = len(products_list)
+
+    print('input_product = ' + input_product)
+
+    for product in products_list:
+        print('check product = '+product)
+        if input_product == product:
+            print('product check OK!' + 'i = ' + str(i) + ': ' + str(list_num))
+            break
+        i += 1
+    if list_num == i:
+
+        print('product check NG!' + 'i = ' + str(i) + ': ' + str(list_num))
+        raise ValidationError('\'' + input_product + '\' リストに存在しない製品番号です')
+
+    if input_product == 'hello':
+        raise ValidationError('一致した場合のエラーです')
+
+def check_product(value):
+#def check_title(value):
+    print('check_product value =' + value)
+    #print('check_product  =' + str(products))
+    #check_product(value, products)
+    check_name(value, products)
+    '''
+    i = 0
+    list_num = len(titles)
+
+    for title in titles:
+        if value == title:
+            print('product一致')
+            break
+        i += 1
+    if list_num == i:
+            raise ValidationError('\'' + value + '\' リストに存在しない製品番号です')
+
+    if value == 'hello':
+        raise ValidationError('一致した場合のエラーです')
+    '''
+
+def check_text(value):
+    if value == 'world':
+        raise ValidationError('一致した場合のエラーです')
+
+
+class BlogForm(forms.Form):
+    # 入力がからの場合はチェックにまわさない
+    title = forms.CharField(
+        label='タイトル',
+        #required=True,
+        required=False,
+        max_length=150,
+        #validators=[check_title],
+        validators=[check_product],
+    )
+    text = forms.CharField(
+        label='テキスト',
+        required=True,
+        max_length=500,
+        widget=forms.Textarea,
+        validators=[check_text],
+    )
+

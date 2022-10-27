@@ -1,0 +1,14 @@
+{% for field in form %}
+    {{ field.name }}:{{ field.value }}<br>
+{% endfor %}
+
+<form method="POST" action="">
+    {% csrf_token %}
+    {% for field in form %}
+       {{ field.as_hidden }}
+    {% endfor %}
+    <input type="submit" name="button_3" value="登録してその他製品登録ページ">
+    <input type="submit" name="button_2" value="登録して次の構成登録ページ">
+    <button type="button" onclick="history.back()">戻る</button>
+</form>
+

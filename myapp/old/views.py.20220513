@@ -1,0 +1,108 @@
+from django.shortcuts import render
+
+# myapp/views.py
+from myapp.models import Blog
+from myapp.models import Products
+from myapp.forms import BlogForm
+
+from django.template import loader
+
+def blog_form(request):
+    form = BlogForm
+
+    if request.method == 'POST':
+        form = BlogForm(request.POST)
+        #if form.is_valid():
+        print('POST')
+        if form.is_valid() and ('button_1' in request.POST):
+            context = { 'form': form }
+            print('button_1')
+            return render(request, 'myapp/est_preview.html', context = context)
+
+        elif form.is_valid() and ('button_2' in request.POST):
+            blog = Blog.objects.create(
+                title = form.cleaned_data['title'],
+                text = form.cleaned_data['text'],
+            )
+ 
+            print('button_2')
+            return render(request, 'myapp/est_register_ok.html')
+
+    print('Prevew POST!')
+
+    context = {
+        'form': form
+    }
+    return render(request, 'myapp/blog_form.html', context)
+
+
+def list_data(request):
+    data = Blog.objects.all()
+    context = {
+            'data': data,
+    }
+
+    print(context)
+
+    if request.method == 'POST':
+        post_data = request.POST
+        #print('post_data = ',post_data)
+        post_data_list = list(post_data)
+        #print('post_data_list_1 = ', str(post_data_list))
+        print('button_value = ', str(post_data_list[1]))
+
+    return render(request, 'myapp/list.html', context)
+
+
+
+
+def select(request):
+    
+    # ボタン区別テスト
+
+    if request.method == 'POST':
+        post_data = request.POST
+        print('post_data = ',post_data)
+
+        #print(request.POST["button_1"])
+
+        if 'button_1' in request.POST:
+            print("button_1 press!")
+
+            #context = { 'id': 1 }
+
+            id = 1
+            context = data_process(id)
+
+            return render(request, 'myapp/show_data.html', context)
+
+        elif 'button_2' in request.POST:
+            #context = { 'id': 2 }
+
+            print("button_2 press!")
+        
+            id = 2
+            context = data_process(id)
+
+            return render(request, 'myapp/show_data.html', context)
+
+    return render(request, 'myapp/select.html')
+
+
+def show_data(request):
+
+    id = 1
+
+
+    context = { 'id': id, }
+
+    return render(request, 'myapp/show_data.html', context)
+
+def data_process(id):
+
+    print('data_process!')
+    context = {
+            'id' : id,
+    }
+
+    return context

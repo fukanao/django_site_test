@@ -1,0 +1,27 @@
+
+<form action="{% url 'myapp:edit_blog_form' %}" method="POST">{% csrf_token %}
+
+    <div>ID:</div>
+    <div>{{ form.id_num }}</div>
+    <br>
+
+
+    <div>Product:</div>
+    <div>{{ form.title }}</div>
+        {% if form.errors.title %}
+            {% for error in form.errors.title %}
+                <div><font color="red">{{ error }}</font></div>
+            {% endfor %}
+        {% endif %}
+   <br>
+    <div>text:</div>
+    <div>{{ form.text }}</div>
+        {% if form.errors.text %}
+            {% for error in form.errors.text %}
+                <div><font color="red">{{ error }}</font></div>
+            {% endfor %}
+        {% endif %}
+   <br>
+    <button type="submit" name="button_1">確認</button>
+</form>
+

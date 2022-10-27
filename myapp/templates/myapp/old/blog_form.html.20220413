@@ -1,0 +1,19 @@
+
+<form action="{% url 'myapp:blog_form' %}" method="POST">{% csrf_token %}
+    <div>title:</div>
+    <dv>{{ form.title }}</div>
+    <br>
+    <div>text:</div>
+    <div>{{ form.text }}</div>
+    <br>
+    <button type="submit">save</button>
+</form>
+{% if form.errors.title %}
+    {% for error in form.errors.title %}
+        <div>{{ error }}</div>
+    {% endfor %}
+    {% for error in form.errors.text %}
+        <div>{{ error }}</div>
+    {% endfor %}
+{% endif %}
+

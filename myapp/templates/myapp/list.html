@@ -1,0 +1,39 @@
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Data</th>
+            <th>created</th>
+            <th>updated</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for object in data %}
+        <tr>
+            <td>
+                    {{ object.id_num }}
+            </td>
+            <td>
+                    {{ object.title }}
+            </td>
+            <td>
+                    {{ object.text }}
+            </td>
+            <td>
+                    {{ object.created_datetime }}
+            </td>
+            <td>
+                    {{ object.updated_datetime }}
+            </td>
+            <form method="POST">
+                {% csrf_token %}
+                <td><button type="submit" name={{ object.id_num }}>select</td>
+            </form>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+        <br>
+    <p>
+    <a href="http://10.0.1.5:8080/myapp/blog_form/">TOP</a>

@@ -1,0 +1,30 @@
+
+# myapp/forms.py
+from django.core.exceptions import ValidationError
+from django.forms import ModelForm
+from django import forms
+from .models import Blog
+
+def check_title(value):
+    if value == 'hello':
+        raise ValidationError('helloってタイトルだけは止めてください')
+
+def check_text(value):
+    if value == 'world':
+        raise ValidationError('worldってテキストだけは止めてください')
+
+class BlogForm(forms.Form):
+    title = forms.CharField(
+        label='タイトル',
+        required=True,
+        max_length=150,
+        validators=[check_title],
+    )
+    text = forms.CharField(
+        label='テキスト',
+        required=True,
+        max_length=500,
+        widget=forms.Textarea,
+        validators=[check_text],
+    )
+

@@ -1,0 +1,62 @@
+
+# myapp/forms.py
+from django.core.exceptions import ValidationError
+from django.forms import ModelForm
+from django import forms
+from .models import Blog
+
+print('forms.py executed')
+
+
+data = Blog.objects.all()
+
+titles = []
+texts = []
+
+for tmp in data:
+    titles.append(tmp.title)
+    texts.append(tmp.text)
+
+#print(titles)
+#print(texts)
+
+#def check_product(input, products_list): で使いまわし
+
+
+def check_title(value):
+
+    i = 0
+    list_num = len(titles)
+
+    for title in titles:
+        if value == title:
+            print('product一致')
+            break
+        i += 1
+    if list_num == i:
+            raise ValidationError('\'' + value + '\' リストに存在しない製品番号です')
+
+    if value == 'hello':
+        raise ValidationError('一致した場合のエラーです')
+
+
+def check_text(value):
+    if value == 'world':
+        raise ValidationError('一致した場合のエラーです')
+
+
+class BlogForm(forms.Form):
+    title = forms.CharField(
+        label='タイトル',
+        required=True,
+        max_length=150,
+        validators=[check_title],
+    )
+    text = forms.CharField(
+        label='テキスト',
+        required=True,
+        max_length=500,
+        widget=forms.Textarea,
+        validators=[check_text],
+    )
+
