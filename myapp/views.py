@@ -21,42 +21,42 @@ class PortalView(TemplateView):
 class InputCompoObject:
     def __init__(self):
         ## id最大値取得
-        self.maxid = 0
+        self.id = 0
         self.title = ''
         self.text = ''
-    def set_maxid(self, maxid):
-        self.maxid = maxid
+    def set_id(self, id):
+        self.id = id
 
-
+## 構成用パラメータ
 compo_maxid_object = Blog.objects.aggregate(Max('id_num'))
-compo_maxid =  int(compo_maxid_object['id_num__max'])
+compo_id =  int(compo_maxid_object['id_num__max'])
 input_compo_object_list = []
 compo_form_num = 0
 
 
 def compo_form(request):
     form = CompoForm
-    global compo_maxid
+    global compo_id
     global compo_form_num
     global input_compo_object_list
 
     ## 入力値オブジェクト作成
     compo_obj = InputCompoObject()
-    compo_obj.set_maxid(compo_maxid)
+    compo_obj.set_id(compo_id)
 
     ## 入力値オブジェクトへインプット関数
-    def input_compo_object(form_num, compo_maxid, title, text):
-        input_compo_object_list[form_num].maxid = compo_maxid
+    def input_compo_object(form_num, compo_id, title, text):
+        input_compo_object_list[form_num].id = compo_id
         input_compo_object_list[form_num].title = form.cleaned_data['title']
         input_compo_object_list[form_num].text = form.cleaned_data['text']
 
     ## 変数デバッグ用関数
     def debug_var():
         print('form_num =',compo_form_num)
-        print('compo_maxid =',compo_maxid)
+        print('compo_id =',compo_id)
         print('len object_list =',len(input_compo_object_list))
         for o in input_compo_object_list:
-            print('object maxid=',o.maxid)
+            print('object maxid=',o.id)
 
     print('#68 blog_form実行直後')
     debug_var()
@@ -73,10 +73,10 @@ def compo_form(request):
             # object listへobjectを追加
             input_compo_object_list.append(compo_obj)
 
-            compo_maxid += 1
+            compo_id += 1
 
             ## objectへ入力値インプット
-            input_compo_object(compo_form_num, compo_maxid, form.cleaned_data['title'],form.cleaned_data['title'])
+            input_compo_object(compo_form_num, compo_id, form.cleaned_data['title'],form.cleaned_data['title'])
 
             print('#87 button_1押した時')
             debug_var()
@@ -100,7 +100,7 @@ def compo_form(request):
         elif form.is_valid() and ('button_3' in request.POST):
             for input_object in input_compo_object_list:
                 blog = Blog.objects.create(
-                        id_num = input_object.maxid,
+                        id_num = input_object.id,
                         title = input_object.title,
                         text = input_object.text,
                 )
