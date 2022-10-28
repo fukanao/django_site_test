@@ -24,7 +24,6 @@ class InputBlogObject:
         #maxid_object = Blog.objects.aggregate(Max('id_num'))
         #self.maxid =  int(maxid_object['id_num__max'])
         self.maxid = 0
-        print('#25', self.maxid)
         self.title = ''
         self.text = ''
     def set_maxid(self, maxid):
@@ -64,9 +63,9 @@ def blog_form(request):
         print('maxid =',maxid)
         print('len object_list =',len(input_blog_object_list))
         for o in input_blog_object_list:
-            print('maxid=',o.maxid)
+            print('object maxid=',o.maxid)
 
-    print('#58')
+    print('#68 blog_form実行直後')
     debug_var()
 
     if request.method == 'POST':
@@ -85,19 +84,20 @@ def blog_form(request):
             ## objectへインプットメソッド
             input_blog_object(form_num, maxid, form.cleaned_data['title'],form.cleaned_data['title'])
 
-            print('#77')
+            print('#87 button_1押した時')
             debug_var()
 
             return render(request, 'myapp/est_preview.html', context = context)
 
-        ## 登録してもう一つの構成登録する
+        ## もう一つの構成登録する
         elif form.is_valid() and ('button_2' in request.POST):
             form_num += 1
-            maxid += 1
+            #maxid += 1
             #obj = InputBlogObject()
             #input_blog_object_list.append(obj)
             #print('#75',input_blog_object_list[form_num].maxid)
-            print('#89')
+
+            print('#100 button_2押した時')
             debug_var()
 
 
@@ -132,9 +132,27 @@ def blog_form(request):
             input_blog_object_list = []
             form_num = 0
 
+            print('#135 button_3押した時')
+            debug_var()
+
+
             return render(request, 'myapp/est_register_ok.html')
 
-    print('#100',form_num)
+        ## リセット
+        elif form.is_valid() and ('button_4' in request.POST):
+            input_blog_object_list = []
+            form_num = 0
+
+            form.title = ''
+            form.text = ''
+
+            context = {
+                'form': form,
+                'compo_num': form_num + 1
+            }
+
+            return render(request, 'myapp/blog_form.html', context = context)
+
     context = {
         'form': form,
         'compo_num': form_num + 1
