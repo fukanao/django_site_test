@@ -36,7 +36,7 @@ def check_text(value):
         raise ValidationError('一致した場合のエラーです')
 
 
-class BlogForm(forms.Form):
+class CompoForm(forms.Form):
 
     '''
     id_num = IntegerField(

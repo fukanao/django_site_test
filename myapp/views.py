@@ -3,7 +3,7 @@ from django.shortcuts import render
 # myapp/views.py
 from myapp.models import Blog
 from myapp.models import Products
-from myapp.forms import BlogForm
+from myapp.forms import CompoForm
 from myapp.forms import EditBlogForm
 
 from django.template import loader
@@ -18,11 +18,9 @@ class PortalView(TemplateView):
     template_name = 'myapp/portal.html'
 
 
-class InputBlogObject:
+class InputCompoObject:
     def __init__(self):
         ## id最大値取得
-        #maxid_object = Blog.objects.aggregate(Max('id_num'))
-        #self.maxid =  int(maxid_object['id_num__max'])
         self.maxid = 0
         self.title = ''
         self.text = ''
@@ -30,59 +28,55 @@ class InputBlogObject:
         self.maxid = maxid
 
 
-maxid_object = Blog.objects.aggregate(Max('id_num'))
-maxid =  int(maxid_object['id_num__max'])
-input_blog_object_list = []
-form_num = 0
+compo_maxid_object = Blog.objects.aggregate(Max('id_num'))
+compo_maxid =  int(compo_maxid_object['id_num__max'])
+input_compo_object_list = []
+compo_form_num = 0
 
 
-def blog_form(request):
-    form = BlogForm
-    global maxid
-    global form_num
-    global input_blog_object_list
-
-    ## id最大値取得
-    #maxid_object = Blog.objects.aggregate(Max('id_num'))
-    #maxid = int(maxid_object['id_num__max'])
+def compo_form(request):
+    form = CompoForm
+    global compo_maxid
+    global compo_form_num
+    global input_compo_object_list
 
     ## 入力値オブジェクト作成
-    obj = InputBlogObject()
-    obj.set_maxid(maxid)
+    compo_obj = InputCompoObject()
+    compo_obj.set_maxid(compo_maxid)
 
     ## 入力値オブジェクトへインプット関数
-    def input_blog_object(form_num, maxid, title, text):
-        input_blog_object_list[form_num].maxid = maxid
-        input_blog_object_list[form_num].title = form.cleaned_data['title']
-        input_blog_object_list[form_num].text = form.cleaned_data['text']
-        #print('#49',input_blog_object_list[form_num].maxid)
+    def input_compo_object(form_num, compo_maxid, title, text):
+        input_compo_object_list[form_num].maxid = compo_maxid
+        input_compo_object_list[form_num].title = form.cleaned_data['title']
+        input_compo_object_list[form_num].text = form.cleaned_data['text']
 
-
+    ## 変数デバッグ用関数
     def debug_var():
-        print('form_num =',form_num)
-        print('maxid =',maxid)
-        print('len object_list =',len(input_blog_object_list))
-        for o in input_blog_object_list:
+        print('form_num =',compo_form_num)
+        print('compo_maxid =',compo_maxid)
+        print('len object_list =',len(input_compo_object_list))
+        for o in input_compo_object_list:
             print('object maxid=',o.maxid)
 
     print('#68 blog_form実行直後')
     debug_var()
 
+    ## 構成入力画面
     if request.method == 'POST':
-        form = BlogForm(request.POST)
+        form = CompoForm(request.POST)
 
         ## プレビューページへ
         if form.is_valid() and ('button_1' in request.POST):
             context = { 'form': form,
-                        'compo_num': form_num + 1
+                        'compo_num': compo_form_num + 1
                         }
             # object listへobjectを追加
-            input_blog_object_list.append(obj)
+            input_compo_object_list.append(compo_obj)
 
-            maxid += 1
+            compo_maxid += 1
 
-            ## objectへインプットメソッド
-            input_blog_object(form_num, maxid, form.cleaned_data['title'],form.cleaned_data['title'])
+            ## objectへ入力値インプット
+            input_compo_object(compo_form_num, compo_maxid, form.cleaned_data['title'],form.cleaned_data['title'])
 
             print('#87 button_1押した時')
             debug_var()
@@ -91,76 +85,56 @@ def blog_form(request):
 
         ## もう一つの構成登録する
         elif form.is_valid() and ('button_2' in request.POST):
-            form_num += 1
-            #maxid += 1
-            #obj = InputBlogObject()
-            #input_blog_object_list.append(obj)
-            #print('#75',input_blog_object_list[form_num].maxid)
-
+            compo_form_num += 1
             print('#100 button_2押した時')
             debug_var()
-
-
-            ## objectへインプットメソッド
-            #input_blog_object(form_num, maxid + 1, form.cleaned_data['title'],form.cleaned_data['title'])
             context = {
                 'form': form,
-                'compo_num': form_num + 1
+                'compo_num': compo_form_num + 1
             }
 
-            return render(request, 'myapp/blog_form.html', context = context)
+            return render(request, 'myapp/compo_form.html', context = context)
 
 
-        ## 登録してその他製品登録ページへ
+        ## DBに登録してその他製品登録ページへ
         elif form.is_valid() and ('button_3' in request.POST):
-            '''
-            blog = Blog.objects.create(
-                id_num = input_blog_object_list[form_num].maxid,
-                title = input_blog_object_list[form_num].title,
-                text = input_blog_object_list[form_num].text,
-            )
-            '''
-
-            for input_object in input_blog_object_list:
+            for input_object in input_compo_object_list:
                 blog = Blog.objects.create(
                         id_num = input_object.maxid,
                         title = input_object.title,
                         text = input_object.text,
                 )
 
-            # object list初期化
-            input_blog_object_list = []
-            form_num = 0
+            # compo object list初期化
+            input_compo_object_list = []
+            compo_form_num = 0
 
             print('#135 button_3押した時')
             debug_var()
 
-
             return render(request, 'myapp/est_register_ok.html')
+
 
         ## リセット
         elif form.is_valid() and ('button_4' in request.POST):
-            input_blog_object_list = []
-            form_num = 0
-
+            input_compo_object_list = []
+            compo_form_num = 0
             form.title = ''
             form.text = ''
 
             context = {
                 'form': form,
-                'compo_num': form_num + 1
+                'compo_num': compo_form_num + 1
             }
 
-            return render(request, 'myapp/blog_form.html', context = context)
+            return render(request, 'myapp/compo_form.html', context = context)
 
     context = {
         'form': form,
-        'compo_num': form_num + 1
+        'compo_num': compo_form_num + 1
     }
 
-    return render(request, 'myapp/blog_form.html', context)
-
-
+    return render(request, 'myapp/compo_form.html', context)
 
 
 def edit_blog_form(request):

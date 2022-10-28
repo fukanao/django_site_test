@@ -1,5 +1,5 @@
 
-<form action="{% url 'myapp:blog_form' %}" method="POST">{% csrf_token %}
+<form action="{% url 'myapp:compo_form' %}" method="POST">{% csrf_token %}
 
     <div>構成:{{ compo_num }}</div>
     <br>
@@ -22,6 +22,5 @@
         {% endif %}
    <br>
     <button type="submit" name="button_1">登録プレビューへ</button>
-    <button type="submit" name="button_4">入力リセット</button>
 </form>
 
